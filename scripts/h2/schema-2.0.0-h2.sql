@@ -636,3 +636,14 @@ CREATE TABLE IF NOT EXISTS `iceberg_cleanup_job` (
 ) COMMENT='async Iceberg table cleanup jobs';
 CREATE INDEX IF NOT EXISTS `idx_state_updated` ON `iceberg_cleanup_job` (`state`, `updated_at`);
 CREATE INDEX IF NOT EXISTS `idx_object` ON `iceberg_cleanup_job` (`catalog_id`, `namespace`, `table_name`, `state`);
+CREATE TABLE IF NOT EXISTS `governance_metadata` (
+  `metalake_name` VARCHAR(128) NOT NULL,
+  `object_type` VARCHAR(32) NOT NULL,
+  `full_name` VARCHAR(1024) NOT NULL,
+  `description` CLOB,
+  `domain_name` VARCHAR(256),
+  `tags` CLOB NOT NULL,
+  `glossary_terms` CLOB NOT NULL,
+  `updated_at` BIGINT NOT NULL,
+  PRIMARY KEY (`metalake_name`, `object_type`, `full_name`)
+);

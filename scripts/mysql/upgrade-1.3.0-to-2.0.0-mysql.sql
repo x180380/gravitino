@@ -29,3 +29,14 @@ CREATE UNIQUE INDEX `uk_mid_geid_del` ON `group_meta` (`metalake_id`, `external_
 
 ALTER TABLE `table_column_version_info`
     MODIFY COLUMN `column_comment` VARCHAR(4096) DEFAULT '' COMMENT 'column comment';
+CREATE TABLE IF NOT EXISTS `governance_metadata` (
+  `metalake_name` VARCHAR(128) NOT NULL,
+  `object_type` VARCHAR(32) NOT NULL,
+  `full_name` VARCHAR(512) NOT NULL,
+  `description` TEXT DEFAULT NULL,
+  `domain_name` VARCHAR(256) DEFAULT NULL,
+  `tags` TEXT NOT NULL,
+  `glossary_terms` TEXT NOT NULL,
+  `updated_at` BIGINT NOT NULL,
+  PRIMARY KEY (`metalake_name`, `object_type`, `full_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Independent business governance metadata';

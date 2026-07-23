@@ -1,0 +1,125 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements. See the NOTICE file
+# distributed with this work for additional information.
+
+---
+paths:
+  /metalakes/{metalake}/governance/objects/{metadataObjectType}/{metadataObjectFullName}:
+    parameters:
+      - $ref: "./openapi.yaml#/components/parameters/metalake"
+      - $ref: "#/components/parameters/governanceObjectType"
+      - $ref: "./openapi.yaml#/components/parameters/metadataObjectFullName"
+    get:
+      tags:
+        - governance
+      summary: Get business governance metadata
+      operationId: getGovernanceMetadata
+      responses:
+        "200":
+          description: Returns the governance metadata
+          content:
+            application/vnd.gravitino.v1+json:
+              schema:
+                $ref: "#/components/responses/GovernanceMetadataResponse"
+        "404":
+          description: Governance metadata was not found
+          content:
+            application/vnd.gravitino.v1+json:
+              schema:
+                $ref: "./openapi.yaml#/components/schemas/ErrorModel"
+        "5xx":
+          $ref: "./openapi.yaml#/components/responses/ServerErrorResponse"
+    put:
+      tags:
+        - governance
+      summary: Create or replace business governance metadata
+      operationId: upsertGovernanceMetadata
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/requests/GovernanceMetadataUpdateRequest"
+      responses:
+        "200":
+          description: Returns the updated governance metadata
+          content:
+            application/vnd.gravitino.v1+json:
+              schema:
+                $ref: "#/components/responses/GovernanceMetadataResponse"
+        "400":
+          $ref: "./openapi.yaml#/components/responses/BadRequestErrorResponse"
+        "5xx":
+          $ref: "./openapi.yaml#/components/responses/ServerErrorResponse"
+    delete:
+      tags:
+        - governance
+      summary: Delete business governance metadata
+      operationId: deleteGovernanceMetadata
+      responses:
+        "200":
+          $ref: "./openapi.yaml#/components/responses/BaseResponse"
+        "404":
+          description: Governance metadata was not found
+          content:
+            application/vnd.gravitino.v1+json:
+              schema:
+                $ref: "./openapi.yaml#/components/schemas/ErrorModel"
+        "5xx":
+          $ref: "./openapi.yaml#/components/responses/ServerErrorResponse"
+
+components:
+  parameters:
+    governanceObjectType:
+      name: metadataObjectType
+      in: path
+      required: true
+      description: Type of governed object
+      schema:
+        type: string
+        enum: [DATABASE, TABLE, COLUMN]
+  requests:
+    GovernanceMetadataUpdateRequest:
+      type: object
+      properties:
+        description:
+          type: string
+          nullable: true
+        domain:
+          type: string
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+          default: []
+        glossaryTerms:
+          type: array
+          items:
+            type: string
+          default: []
+  responses:
+    GovernanceMetadataResponse:
+      type: object
+      required: [code, metadata]
+      properties:
+        code:
+          type: integer
+          format: int32
+          example: 0
+        metadata:
+          $ref: "#/components/schemas/GovernanceMetadata"
+  schemas:
+    GovernanceMetadata:
+      allOf:
+        - $ref: "#/components/requests/GovernanceMetadataUpdateRequest"
+        - type: object
+          required: [objectType, fullName, tags, glossaryTerms, updatedAt]
+          properties:
+            objectType:
+              type: string
+            fullName:
+              type: string
+            updatedAt:
+              type: integer
+              format: int64

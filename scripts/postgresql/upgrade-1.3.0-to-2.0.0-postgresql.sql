@@ -31,3 +31,14 @@ CREATE UNIQUE INDEX IF NOT EXISTS uk_mid_geid_del ON group_meta (metalake_id, ex
 
 ALTER TABLE table_column_version_info
     ALTER COLUMN column_comment TYPE VARCHAR(4096);
+CREATE TABLE IF NOT EXISTS governance_metadata (
+  metalake_name VARCHAR(128) NOT NULL,
+  object_type VARCHAR(32) NOT NULL,
+  full_name VARCHAR(1024) NOT NULL,
+  description TEXT,
+  domain_name VARCHAR(256),
+  tags TEXT NOT NULL,
+  glossary_terms TEXT NOT NULL,
+  updated_at BIGINT NOT NULL,
+  PRIMARY KEY (metalake_name, object_type, full_name)
+);

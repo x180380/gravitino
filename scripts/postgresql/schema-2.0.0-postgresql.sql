@@ -1094,3 +1094,14 @@ COMMENT ON COLUMN iceberg_cleanup_job.last_error IS 'truncated reason for the mo
 COMMENT ON COLUMN iceberg_cleanup_job.heartbeat_at IS 'last heartbeat from the worker, 0 when not running';
 COMMENT ON COLUMN iceberg_cleanup_job.created_by IS 'principal that requested the drop (audit)';
 COMMENT ON COLUMN iceberg_cleanup_job.updated_at IS 'last state change, drives poll ordering and old finished-job cleanup';
+CREATE TABLE IF NOT EXISTS governance_metadata (
+  metalake_name VARCHAR(128) NOT NULL,
+  object_type VARCHAR(32) NOT NULL,
+  full_name VARCHAR(1024) NOT NULL,
+  description TEXT,
+  domain_name VARCHAR(256),
+  tags TEXT NOT NULL,
+  glossary_terms TEXT NOT NULL,
+  updated_at BIGINT NOT NULL,
+  PRIMARY KEY (metalake_name, object_type, full_name)
+);
