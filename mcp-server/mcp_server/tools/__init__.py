@@ -19,6 +19,7 @@ from fastmcp import FastMCP
 
 from mcp_server.tools.catalog import load_catalog_tools
 from mcp_server.tools.fileset import load_fileset_tools
+from mcp_server.tools.governance import load_governance_tools
 from mcp_server.tools.job import load_job_tool
 from mcp_server.tools.metadata import load_metadata_tool
 from mcp_server.tools.model import load_model_tools
@@ -38,6 +39,7 @@ def load_tools(mcp: FastMCP):
     load_topic_tools(mcp)
     load_model_tools(mcp)
     load_fileset_tools(mcp)
+    load_governance_tools(mcp)
     load_tag_tool(mcp)
     load_metadata_tool(mcp)
     load_statistic_tools(mcp)

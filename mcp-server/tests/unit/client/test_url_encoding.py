@@ -28,6 +28,9 @@ from mcp_server.client.plain.plain_rest_client_catalog_operation import (
 from mcp_server.client.plain.plain_rest_client_fileset_operation import (
     PlainRESTClientFilesetOperation,
 )
+from mcp_server.client.plain.plain_rest_client_governance_operation import (
+    PlainRESTClientGovernanceOperation,
+)
 from mcp_server.client.plain.plain_rest_client_job_operation import (
     PlainRESTClientJobOperation,
 )
@@ -112,6 +115,52 @@ class TestCatalogOperationUrlEncoding(unittest.TestCase):
         result = asyncio.run(op.set_catalog_in_use("catalog", False))
         self.assertEqual('{"code": 0}', result)
         self.assertEqual({"inUse": False}, client.patch.call_args[1]["json"])
+
+
+class TestGovernanceOperationUrlEncoding(unittest.TestCase):
+    def test_get_business_metadata_encodes_path_segments(self):
+        client = _make_mock_client({"metadata": {}})
+        op = PlainRESTClientGovernanceOperation(_PATH_TRAVERSAL, client)
+        asyncio.run(op.get_business_metadata(_QUERY_INJECTION, _SLASH))
+        url = _called_url(client.get)
+        self.assertIn(_ENCODED_PATH_TRAVERSAL, url)
+        self.assertIn(_ENCODED_QUERY_INJECTION, url)
+        self.assertIn(_ENCODED_SLASH, url)
+
+    def test_upsert_business_metadata_sends_complete_body(self):
+        client = _make_mock_client({"metadata": {}})
+        op = PlainRESTClientGovernanceOperation(METALAKE, client)
+        asyncio.run(
+            op.upsert_business_metadata(
+                "TABLE",
+                "catalog.schema.table",
+                "Orders",
+                "Commerce",
+                ["certified"],
+                ["Order"],
+            )
+        )
+        self.assertEqual(
+            {
+                "description": "Orders",
+                "domain": "Commerce",
+                "tags": ["certified"],
+                "glossaryTerms": ["Order"],
+            },
+            client.put.call_args[1]["json"],
+        )
+
+    def test_delete_business_metadata_uses_delete(self):
+        client = _make_mock_client({"code": 0})
+        op = PlainRESTClientGovernanceOperation(METALAKE, client)
+        result = asyncio.run(
+            op.delete_business_metadata("COLUMN", "cat.schema.table.column")
+        )
+        self.assertEqual('{"code": 0}', result)
+        self.assertIn(
+            "/governance/objects/COLUMN/cat.schema.table.column",
+            _called_url(client.delete),
+        )
 
 
 class TestSchemaOperationUrlEncoding(unittest.TestCase):

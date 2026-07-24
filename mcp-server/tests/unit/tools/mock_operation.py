@@ -17,6 +17,7 @@
 
 from mcp_server.client import (
     CatalogOperation,
+    GovernanceOperation,
     GravitinoOperation,
     ModelOperation,
     PolicyOperation,
@@ -36,6 +37,9 @@ class MockOperation(GravitinoOperation):
 
     def as_table_operation(self) -> TableOperation:
         return MockTableOperation()
+
+    def as_governance_operation(self) -> GovernanceOperation:
+        return MockGovernanceOperation()
 
     def as_schema_operation(self) -> SchemaOperation:
         return MockSchemaOperation()
@@ -63,6 +67,29 @@ class MockOperation(GravitinoOperation):
 
     def as_policy_operation(self) -> PolicyOperation:
         return MockPolicyOperation()
+
+
+class MockGovernanceOperation(GovernanceOperation):
+    async def get_business_metadata(self, object_type, full_name) -> str:
+        return f"mock_business_metadata: {object_type} {full_name}"
+
+    # pylint: disable=too-many-positional-arguments
+    async def upsert_business_metadata(
+        self,
+        object_type,
+        full_name,
+        description,
+        domain,
+        tags,
+        glossary_terms,
+    ) -> str:
+        return (
+            f"mock_business_metadata_upserted: {object_type} {full_name}, "
+            f"{description}, {domain}, {tags}, {glossary_terms}"
+        )
+
+    async def delete_business_metadata(self, object_type, full_name) -> str:
+        return f"mock_business_metadata_deleted: {object_type} {full_name}"
 
 
 class MockCatalogOperation(CatalogOperation):

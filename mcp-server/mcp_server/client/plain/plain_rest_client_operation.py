@@ -19,6 +19,7 @@ import httpx
 
 from mcp_server.client import (
     CatalogOperation,
+    GovernanceOperation,
     GravitinoOperation,
     ModelOperation,
     PolicyOperation,
@@ -32,6 +33,9 @@ from mcp_server.client.plain.plain_rest_client_catalog_operation import (
 )
 from mcp_server.client.plain.plain_rest_client_fileset_operation import (
     PlainRESTClientFilesetOperation,
+)
+from mcp_server.client.plain.plain_rest_client_governance_operation import (
+    PlainRESTClientGovernanceOperation,
 )
 from mcp_server.client.plain.plain_rest_client_job_operation import (
     PlainRESTClientJobOperation,
@@ -82,6 +86,9 @@ class PlainRESTClientOperation(GravitinoOperation):
         self._catalog_operation = PlainRESTClientCatalogOperation(
             metalake_name, _rest_client
         )
+        self._governance_operation = PlainRESTClientGovernanceOperation(
+            metalake_name, _rest_client
+        )
         self._table_operation = PlainRESTClientTableOperation(
             metalake_name, _rest_client
         )
@@ -116,6 +123,9 @@ class PlainRESTClientOperation(GravitinoOperation):
 
     def as_catalog_operation(self) -> CatalogOperation:
         return self._catalog_operation
+
+    def as_governance_operation(self) -> GovernanceOperation:
+        return self._governance_operation
 
     def as_table_operation(self) -> TableOperation:
         return self._table_operation

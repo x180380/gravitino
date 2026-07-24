@@ -19,6 +19,7 @@ from abc import ABC, abstractmethod
 
 from mcp_server.client.catalog_operation import CatalogOperation
 from mcp_server.client.fileset_operation import FilesetOperation
+from mcp_server.client.governance_operation import GovernanceOperation
 from mcp_server.client.job_operation import JobOperation
 from mcp_server.client.model_operation import ModelOperation
 from mcp_server.client.policy_operation import PolicyOperation
@@ -33,6 +34,11 @@ class GravitinoOperation(ABC):
     """
     Abstract base class for Gravitino operations with multiple operation facets.
     """
+
+    @abstractmethod
+    def as_governance_operation(self) -> GovernanceOperation:
+        """Access the business governance metadata operation interface."""
+        pass
 
     @abstractmethod
     def as_table_operation(self) -> TableOperation:

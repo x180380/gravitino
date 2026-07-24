@@ -16,6 +16,7 @@
 # under the License.
 
 from mcp_server.client.catalog_operation import CatalogOperation
+from mcp_server.client.governance_operation import GovernanceOperation
 from mcp_server.client.gravitino_operation import GravitinoOperation
 from mcp_server.client.job_operation import JobOperation
 from mcp_server.client.model_operation import ModelOperation
