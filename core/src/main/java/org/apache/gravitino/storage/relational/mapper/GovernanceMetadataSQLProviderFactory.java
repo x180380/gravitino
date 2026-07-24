@@ -48,6 +48,12 @@ public class GovernanceMetadataSQLProviderFactory {
     return provider().select(metalakeName, objectType, fullName);
   }
 
+  /** Returns list SQL. */
+  public static String list(
+      @Param("metalakeName") String metalakeName, @Param("objectType") String objectType) {
+    return provider().list(metalakeName, objectType);
+  }
+
   /** Returns upsert SQL. */
   public static String upsert(@Param("metadata") GovernanceMetadataPO metadata) {
     return provider().upsert(metadata);

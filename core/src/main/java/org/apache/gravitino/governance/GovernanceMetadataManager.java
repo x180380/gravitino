@@ -26,7 +26,9 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.gravitino.dto.governance.GovernanceDefinitionDTO;
 import org.apache.gravitino.dto.governance.GovernanceMetadataDTO;
+import org.apache.gravitino.dto.requests.GovernanceDefinitionRequest;
 import org.apache.gravitino.dto.requests.GovernanceMetadataUpdateRequest;
 import org.apache.gravitino.json.JsonUtils;
 import org.apache.gravitino.storage.relational.mapper.GovernanceMetadataMapper;
@@ -40,6 +42,12 @@ import org.apache.gravitino.storage.relational.utils.SessionUtils;
  * Gravitino entity tables. This keeps upgrades from the upstream project localized.
  */
 public class GovernanceMetadataManager {
+  /** Definition type used for business domains. */
+  public static final String DOMAIN_DEFINITION = "DOMAIN_DEFINITION";
+
+  /** Definition type used for glossary terms. */
+  public static final String GLOSSARY_DEFINITION = "GLOSSARY_DEFINITION";
+
   private static final Set<String> SUPPORTED_TYPES = Set.of("DATABASE", "TABLE", "COLUMN");
   private static final TypeReference<List<String>> STRING_LIST =
       new TypeReference<List<String>>() {};
@@ -86,6 +94,42 @@ public class GovernanceMetadataManager {
         > 0;
   }
 
+  /** Lists reusable definitions of one supported definition type. */
+  public List<GovernanceDefinitionDTO> listDefinitions(String metalakeName, String definitionType) {
+    validateDefinitionType(metalakeName, definitionType, "definition");
+    return SessionUtils.getWithoutCommit(
+        GovernanceMetadataMapper.class,
+        mapper ->
+            mapper.list(metalakeName, definitionType).stream().map(this::toDefinition).toList());
+  }
+
+  /** Creates or completely replaces a reusable definition. */
+  public GovernanceDefinitionDTO upsertDefinition(
+      String metalakeName, String definitionType, GovernanceDefinitionRequest request) {
+    validateDefinitionType(metalakeName, definitionType, request.getName());
+    request.validate();
+    GovernanceMetadataPO definition = new GovernanceMetadataPO();
+    definition.setMetalakeName(metalakeName);
+    definition.setObjectType(definitionType);
+    definition.setFullName(request.getName().trim());
+    definition.setDescription(request.getDescription());
+    definition.setTags("[]");
+    definition.setGlossaryTerms("[]");
+    definition.setUpdatedAt(System.currentTimeMillis());
+    SessionUtils.doWithCommit(GovernanceMetadataMapper.class, mapper -> mapper.upsert(definition));
+    return toDefinition(definition);
+  }
+
+  /** Deletes a reusable definition. */
+  public boolean deleteDefinition(
+      String metalakeName, String definitionType, String definitionName) {
+    validateDefinitionType(metalakeName, definitionType, definitionName);
+    return SessionUtils.doWithCommitAndFetchResult(
+            GovernanceMetadataMapper.class,
+            mapper -> mapper.delete(metalakeName, definitionType, definitionName))
+        > 0;
+  }
+
   private static String normalizeAndValidate(
       String metalakeName, String objectType, String fullName) {
     if (StringUtils.isAnyBlank(metalakeName, objectType, fullName)) {
@@ -110,6 +154,21 @@ public class GovernanceMetadataManager {
         readList(metadata.getTags()),
         readList(metadata.getGlossaryTerms()),
         metadata.getUpdatedAt());
+  }
+
+  private GovernanceDefinitionDTO toDefinition(GovernanceMetadataPO definition) {
+    return new GovernanceDefinitionDTO(
+        definition.getFullName(), definition.getDescription(), definition.getUpdatedAt());
+  }
+
+  private static void validateDefinitionType(
+      String metalakeName, String definitionType, String definitionName) {
+    if (StringUtils.isAnyBlank(metalakeName, definitionType, definitionName)) {
+      throw new IllegalArgumentException("metalake, definitionType, and name must not be empty");
+    }
+    if (!Set.of(DOMAIN_DEFINITION, GLOSSARY_DEFINITION).contains(definitionType)) {
+      throw new IllegalArgumentException("Unsupported governance definition type");
+    }
   }
 
   private static String writeList(List<String> value) {

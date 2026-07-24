@@ -24,6 +24,7 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.gravitino.Config;
 import org.apache.gravitino.GravitinoEnv;
 import org.apache.gravitino.dto.governance.GovernanceMetadataDTO;
+import org.apache.gravitino.dto.requests.GovernanceDefinitionRequest;
 import org.apache.gravitino.dto.requests.GovernanceMetadataUpdateRequest;
 import org.apache.gravitino.storage.relational.TestJDBCBackend;
 import org.junit.jupiter.api.AfterAll;
@@ -84,5 +85,28 @@ public class TestGovernanceMetadataManager extends TestJDBCBackend {
     Assertions.assertThrows(
         IllegalArgumentException.class,
         () -> manager.upsert("metalake", "catalog", "catalog", request));
+  }
+
+  @TestTemplate
+  public void testGovernanceDefinitionLifecycle() {
+    GovernanceDefinitionRequest customer =
+        new GovernanceDefinitionRequest("Customer", "Customer-related data");
+    manager.upsertDefinition("metalake", GovernanceMetadataManager.DOMAIN_DEFINITION, customer);
+    manager.upsertDefinition(
+        "metalake",
+        GovernanceMetadataManager.DOMAIN_DEFINITION,
+        new GovernanceDefinitionRequest("Finance", "Financial data"));
+
+    Assertions.assertEquals(
+        Arrays.asList("Customer", "Finance"),
+        manager.listDefinitions("metalake", GovernanceMetadataManager.DOMAIN_DEFINITION).stream()
+            .map(definition -> definition.getName())
+            .toList());
+    Assertions.assertTrue(
+        manager.deleteDefinition(
+            "metalake", GovernanceMetadataManager.DOMAIN_DEFINITION, "Customer"));
+    Assertions.assertFalse(
+        manager.deleteDefinition(
+            "metalake", GovernanceMetadataManager.DOMAIN_DEFINITION, "Customer"));
   }
 }

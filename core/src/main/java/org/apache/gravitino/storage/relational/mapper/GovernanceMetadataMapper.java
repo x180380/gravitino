@@ -18,6 +18,7 @@
  */
 package org.apache.gravitino.storage.relational.mapper;
 
+import java.util.List;
 import org.apache.gravitino.storage.relational.po.GovernanceMetadataPO;
 import org.apache.ibatis.annotations.DeleteProvider;
 import org.apache.ibatis.annotations.InsertProvider;
@@ -33,6 +34,10 @@ public interface GovernanceMetadataMapper {
       @Param("metalakeName") String metalakeName,
       @Param("objectType") String objectType,
       @Param("fullName") String fullName);
+
+  @SelectProvider(type = GovernanceMetadataSQLProviderFactory.class, method = "list")
+  List<GovernanceMetadataPO> list(
+      @Param("metalakeName") String metalakeName, @Param("objectType") String objectType);
 
   @InsertProvider(type = GovernanceMetadataSQLProviderFactory.class, method = "upsert")
   void upsert(@Param("metadata") GovernanceMetadataPO metadata);

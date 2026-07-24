@@ -35,6 +35,16 @@ public class GovernanceMetadataBaseSQLProvider {
         + " AND full_name = #{fullName}";
   }
 
+  /** Returns SQL for listing one definition type. */
+  public String list(String metalakeName, String objectType) {
+    return "SELECT metalake_name AS metalakeName, object_type AS objectType,"
+        + " full_name AS fullName, description, domain_name AS domainName, tags,"
+        + " glossary_terms AS glossaryTerms, updated_at AS updatedAt FROM "
+        + TABLE_NAME
+        + " WHERE metalake_name = #{metalakeName} AND object_type = #{objectType}"
+        + " ORDER BY full_name";
+  }
+
   /** Returns SQL for replacing one object. */
   public String upsert(GovernanceMetadataPO metadata) {
     return "INSERT INTO "
